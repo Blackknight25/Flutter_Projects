@@ -1,6 +1,6 @@
-# proj2
+# WordPair
 
-A new Flutter project.
+A new Flutter project. Exploring Flutter widgets. Work in progress but basics are there.
 
 ## Getting Started
 
