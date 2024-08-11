@@ -36,6 +36,9 @@ class _MyHomePageState extends State<MyHomePage>
   final List<Recipe> _savedRecipes = [];
   late Future<List<Recipe>> _recipesFuture;
   late TabController _tabController;
+  List<Recipe> _allRecipes = [];
+  List<Recipe> _filteredRecipes = [];
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -51,6 +54,15 @@ class _MyHomePageState extends State<MyHomePage>
       } else {
         _savedRecipes.add(recipe);
       }
+    });
+  }
+
+  void _filterRecipes(String query){
+    setState(() {
+      _searchQuery = query;
+      _filteredRecipes = _allRecipes.where((recipe){
+        return recipe.title.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
     });
   }
 
@@ -87,10 +99,21 @@ class _MyHomePageState extends State<MyHomePage>
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return const Center(child: Text('No recipes found'));
               } else {
-                final recipes = snapshot.data!;
+                _allRecipes = snapshot.data!;
+                _filteredRecipes = _searchQuery.isEmpty ? _allRecipes : _filteredRecipes;
                 return SingleChildScrollView(
                   child: Column(
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            labelText: 'Search Recipes',
+                            border: OutlineInputBorder(),
+                          ),
+                          onChanged: _filterRecipes,
+                        ),
+                      ),
                       // Text widget above the ListView
                       Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -105,11 +128,11 @@ class _MyHomePageState extends State<MyHomePage>
                         // Allows ListView to take only as much space as needed
                         physics: const NeverScrollableScrollPhysics(),
                         // Prevent scrolling conflicts with SingleChildScrollView
-                        itemCount: recipes.length,
+                        itemCount: _filteredRecipes.length,
                         itemBuilder: (context, index) {
                           return RecipeCard(
-                            recipe: recipes[index],
-                            isSaved: _savedRecipes.contains(recipes[index]),
+                            recipe: _filteredRecipes[index],
+                            isSaved: _savedRecipes.contains(_filteredRecipes[index]),
                             onToggleSaved: toggleSavedRecipe,
                           );
                         },
